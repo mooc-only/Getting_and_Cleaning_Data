@@ -1,6 +1,8 @@
 ##  function setup.filedata() 
 ##      Parameter:
 ##          URL to download
+##          List of filenames or folder to check if script is running inside the 
+##              desired workspace
 ##
 ##      Functionality:
 ##          1. Decode the url and get the filename to download
@@ -12,33 +14,44 @@
 ##      Return:
 ##          The folder name where data resides
 ##
-setup.filedata <- function(url) {
+setup.filedata <- function(url, wsEvidence = c()) {
     list <- strsplit( URLdecode(url), "/" )[[1]]
     zipfile <- list[ length(list) ]
     foldername <- sub(".zip$", "", zipfile)
     
-    # if inside the folder of data set
-    datasetFiles = c("activity_labels.txt", "features_info.txt", "features.txt", "README.txt", "test", "train")
-    if ( all(file.exists(datasetFiles)) ) return(".")
+    # if inside the folder of dataset
+    if ( ! is.null(wsEvidence) )
+        if ( all(file.exists(wsEvidence)) ) 
+            return(".")
     
-    # if in the same level of data set
+    # if at the same level of dataset
     if ( file.exists( foldername ) ) return(foldername)
     
     if (! file.exists( zipfile )) {
         tempfile <- paste0("/tmp/", zipfile)
         
         if (! file.exists( tempfile )) {
-            print( paste("Downloading", URLdecode(url)) )
-            download.file( url, tempfile )
+            
+            cat( "Downloading", URLdecode(url) )
+            if (grepl("^https:", url))
+                download.file( url, tempfile, method = "curl" )
+            else
+                download.file( url, tempfile )
+            
             zipfile <- tempfile
         }
     }
-    print( paste("Decompressing", zipfile) )
+    cat( "Decompressing", zipfile )
     unzip( zipfile )
-    foldername
+    
+    if ( file.exists(foldername) )
+        foldername
+    else
+        "."
 }
 
-folder <- setup.filedata("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip")
+folder <- setup.filedata("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",
+			c("activity_labels.txt", "features_info.txt", "features.txt", "README.txt", "test", "train"))
 
 #   1. Merges the training and the test sets to create one data set.
 
