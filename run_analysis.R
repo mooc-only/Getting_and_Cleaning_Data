@@ -17,16 +17,23 @@ setup.filedata <- function(url) {
     zipfile <- list[ length(list) ]
     foldername <- sub(".zip$", "", zipfile)
     
+    # if inside the folder of data set
+    datasetFiles = c("activity_labels.txt", "features_info.txt", "features.txt", "README.txt", "test", "train")
+    if ( all(file.exists(datasetFiles)) ) return(".")
+    
+    # if in the same level of data set
     if ( file.exists( foldername ) ) return(foldername)
     
     if (! file.exists( zipfile )) {
         tempfile <- paste0("/tmp/", zipfile)
         
         if (! file.exists( tempfile )) {
+            print( paste("Downloading", URLdecode(url)) )
             download.file( url, tempfile )
             zipfile <- tempfile
         }
     }
+    print( paste("Decompressing", zipfile) )
     unzip( zipfile )
     foldername
 }
@@ -37,12 +44,14 @@ folder <- setup.filedata("https://d396qusza40orc.cloudfront.net/getdata%2Fprojec
 
 set <- "train"
 filepaths <- paste(folder, set, paste0( c("X_", "y_", "subject_"), set, ".txt" ), sep = "/")
+print( paste("Reading", set, "dataset: ", filepaths[1]) )
 trainVars <- read.table(filepaths[1])
 trainActivities <- read.table(filepaths[2])
 trainSubjects <- read.table(filepaths[3])
 
 set <- "test"
 filepaths <- paste(folder, set, paste0( c("X_", "y_", "subject_"), set, ".txt" ), sep = "/")
+print( paste("Reading", set, "dataset: ", filepaths[1]) )
 testVars <- read.table(filepaths[1])
 testActivities <- read.table(filepaths[2])
 testSubjects <- read.table(filepaths[3])
