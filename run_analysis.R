@@ -62,14 +62,14 @@ subjects <- rbind(trainSubjects, testSubjects)
 
 #   2. Extracts only the measurements on the mean and standard deviation for each measurement. 
 
-features <- read.table(paste(foldername, "features.txt", sep = "/"))
+features <- read.table(paste(folder, "features.txt", sep = "/"))
 indices <- grep("-mean[^a-zA-Z]|-std[^a-zA-Z]", features[, 2])
 
 newdata <- vars[, indices]
 
 #   3. Uses descriptive activity names to name the activities in the data set
 
-activityLabels <- read.table(paste(foldername, "activity_labels.txt", sep = "/"))
+activityLabels <- read.table(paste(folder, "activity_labels.txt", sep = "/"))
 activities[, 1] <- activityLabels[ activities[, 1], 2 ]
 newdata <- cbind(subjects, activities, newdata)
 
